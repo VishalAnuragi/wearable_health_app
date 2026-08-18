@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../shopping/presentation/screens/shop_screen.dart';
 import 'dashboard_screen.dart';
 import 'history_screen.dart';
 
@@ -16,7 +17,7 @@ class _HomeWrapperState extends State<HomeWrapper> {
     const DashboardScreen(),
     const HistoryScreen(),
     // We will add the ShoppingScreen here next!
-    const Center(child: Text('Shop Coming Soon')),
+    const ShopScreen(),
   ];
 
   @override

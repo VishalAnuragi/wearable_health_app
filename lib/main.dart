@@ -13,6 +13,8 @@ import 'features/wearable/data/mock_wearable_service.dart';
 import 'features/wearable/domain/wearable_service.dart';
 import 'features/wearable/presentation/bloc/wearable_bloc.dart';
 import 'features/wearable/presentation/bloc/wearable_event.dart';
+import 'features/shopping/data/shop_repository.dart';
+import 'features/shopping/presentation/bloc/shop_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +23,7 @@ void main() async {
   final databaseHelper = DatabaseHelper();
   final wearableService = MockWearableService();
   final authRepository = AuthRepositoryImpl(apiClient);
+  final shopRepository = ShopRepository(apiClient);
 
   // Initialize the Sync Manager
   final syncManager = SyncManager(apiClient, databaseHelper);
@@ -31,6 +34,7 @@ void main() async {
     wearableService: wearableService,
     authRepository: authRepository,
     syncManager: syncManager,
+    shopRepository: shopRepository,
   ));
 }
 
@@ -40,6 +44,7 @@ class MyApp extends StatelessWidget {
   final WearableService wearableService;
   final AuthRepository authRepository;
   final SyncManager syncManager; // Add to constructor
+  final ShopRepository shopRepository;
 
   const MyApp({
     super.key,
@@ -48,6 +53,7 @@ class MyApp extends StatelessWidget {
     required this.wearableService,
     required this.authRepository,
     required this.syncManager,
+    required this.shopRepository,
   });
 
   @override
@@ -59,6 +65,7 @@ class MyApp extends StatelessWidget {
         RepositoryProvider<WearableService>.value(value: wearableService),
         RepositoryProvider<AuthRepository>.value(value: authRepository),
         RepositoryProvider<SyncManager>.value(value: syncManager), // Provide globally
+        RepositoryProvider<ShopRepository>.value(value: shopRepository),
       ],
       // ... keep the rest of your MultiBlocProvider and MaterialApp exactly the same
       child: MultiBlocProvider(
@@ -72,6 +79,9 @@ class MyApp extends StatelessWidget {
               context.read<WearableService>(),
               context.read<DatabaseHelper>(),
             )..add(ConnectDevice('FITRING-001')),
+          ),
+          BlocProvider<ShopBloc>(
+            create: (context) => ShopBloc(context.read<ShopRepository>())..add(LoadProducts()),
           ),
         ],
         child: MaterialApp(
