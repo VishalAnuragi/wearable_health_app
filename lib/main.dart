@@ -8,7 +8,7 @@ import 'features/auth/domain/auth_repository.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/health/domain/sync_manager.dart'; // Add this import
-import 'features/health/presentation/screens/dashboard_screen.dart';
+import 'features/health/presentation/screens/home_wrapper.dart';
 import 'features/wearable/data/mock_wearable_service.dart';
 import 'features/wearable/domain/wearable_service.dart';
 import 'features/wearable/presentation/bloc/wearable_bloc.dart';
@@ -83,7 +83,7 @@ class MyApp extends StatelessWidget {
           home: BlocBuilder<AuthBloc, AuthState>(
             builder: (context, state) {
               if (state is AuthAuthenticated) {
-                return const DashboardScreen();
+                return const HomeWrapper(); // Replaced DashboardScreen with HomeWrapper
               } else if (state is AuthUnauthenticated || state is AuthError) {
                 return const LoginScreen();
               }

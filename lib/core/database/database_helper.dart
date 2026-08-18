@@ -78,4 +78,14 @@ class DatabaseHelper {
       whereArgs: ids,
     );
   }
+
+  // Fetch the latest 50 readings for the chart
+  Future<List<Map<String, dynamic>>> getRecentReadings({int limit = 50}) async {
+    final db = await database;
+    return await db.query(
+      tableReadings,
+      orderBy: 'timestamp DESC',
+      limit: limit,
+    );
+  }
 }
