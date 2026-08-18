@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'core/database/database_helper.dart'; // Import the db helper
+
+import 'core/database/database_helper.dart';
 import 'core/network/api_client.dart';
+import 'features/auth/data/auth_repository_impl.dart';
+import 'features/auth/domain/auth_repository.dart';
+import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/health/presentation/screens/dashboard_screen.dart';
 import 'features/wearable/data/mock_wearable_service.dart';
 import 'features/wearable/domain/wearable_service.dart';
@@ -9,17 +14,18 @@ import 'features/wearable/presentation/bloc/wearable_bloc.dart';
 import 'features/wearable/presentation/bloc/wearable_event.dart';
 
 void main() async {
-  // Ensure bindings are initialized before accessing native channels (like SQLite)
   WidgetsFlutterBinding.ensureInitialized();
 
   final apiClient = ApiClient();
-  final databaseHelper = DatabaseHelper(); // Initialize the DB
+  final databaseHelper = DatabaseHelper();
   final wearableService = MockWearableService();
+  final authRepository = AuthRepositoryImpl(apiClient);
 
   runApp(MyApp(
-      apiClient: apiClient,
-      databaseHelper: databaseHelper,
-      wearableService: wearableService
+    apiClient: apiClient,
+    databaseHelper: databaseHelper,
+    wearableService: wearableService,
+    authRepository: authRepository,
   ));
 }
 
@@ -27,12 +33,14 @@ class MyApp extends StatelessWidget {
   final ApiClient apiClient;
   final DatabaseHelper databaseHelper;
   final WearableService wearableService;
+  final AuthRepository authRepository;
 
   const MyApp({
     super.key,
     required this.apiClient,
     required this.databaseHelper,
-    required this.wearableService
+    required this.wearableService,
+    required this.authRepository,
   });
 
   @override
@@ -42,11 +50,15 @@ class MyApp extends StatelessWidget {
         RepositoryProvider<ApiClient>.value(value: apiClient),
         RepositoryProvider<DatabaseHelper>.value(value: databaseHelper),
         RepositoryProvider<WearableService>.value(value: wearableService),
+        RepositoryProvider<AuthRepository>.value(value: authRepository),
       ],
       child: MultiBlocProvider(
         providers: [
+          BlocProvider<AuthBloc>(
+            create: (context) => AuthBloc(context.read<AuthRepository>())
+              ..add(AppStarted()),
+          ),
           BlocProvider<WearableBloc>(
-            // Pass the databaseHelper into the WearableBloc
             create: (context) => WearableBloc(
               context.read<WearableService>(),
               context.read<DatabaseHelper>(),
@@ -59,7 +71,20 @@ class MyApp extends StatelessWidget {
             useMaterial3: true,
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
           ),
-          home: const DashboardScreen(),
+          // Route based on authentication state
+          home: BlocBuilder<AuthBloc, AuthState>(
+            builder: (context, state) {
+              if (state is AuthAuthenticated) {
+                return const DashboardScreen();
+              } else if (state is AuthUnauthenticated || state is AuthError) {
+                return const LoginScreen();
+              }
+              // Show a splash/loading screen while checking token on boot
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            },
+          ),
         ),
       ),
     );
