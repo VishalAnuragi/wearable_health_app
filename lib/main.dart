@@ -7,6 +7,7 @@ import 'features/auth/data/auth_repository_impl.dart';
 import 'features/auth/domain/auth_repository.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
+import 'features/health/domain/sync_manager.dart'; // Add this import
 import 'features/health/presentation/screens/dashboard_screen.dart';
 import 'features/wearable/data/mock_wearable_service.dart';
 import 'features/wearable/domain/wearable_service.dart';
@@ -21,11 +22,15 @@ void main() async {
   final wearableService = MockWearableService();
   final authRepository = AuthRepositoryImpl(apiClient);
 
+  // Initialize the Sync Manager
+  final syncManager = SyncManager(apiClient, databaseHelper);
+
   runApp(MyApp(
     apiClient: apiClient,
     databaseHelper: databaseHelper,
     wearableService: wearableService,
     authRepository: authRepository,
+    syncManager: syncManager,
   ));
 }
 
@@ -34,6 +39,7 @@ class MyApp extends StatelessWidget {
   final DatabaseHelper databaseHelper;
   final WearableService wearableService;
   final AuthRepository authRepository;
+  final SyncManager syncManager; // Add to constructor
 
   const MyApp({
     super.key,
@@ -41,6 +47,7 @@ class MyApp extends StatelessWidget {
     required this.databaseHelper,
     required this.wearableService,
     required this.authRepository,
+    required this.syncManager,
   });
 
   @override
@@ -51,7 +58,9 @@ class MyApp extends StatelessWidget {
         RepositoryProvider<DatabaseHelper>.value(value: databaseHelper),
         RepositoryProvider<WearableService>.value(value: wearableService),
         RepositoryProvider<AuthRepository>.value(value: authRepository),
+        RepositoryProvider<SyncManager>.value(value: syncManager), // Provide globally
       ],
+      // ... keep the rest of your MultiBlocProvider and MaterialApp exactly the same
       child: MultiBlocProvider(
         providers: [
           BlocProvider<AuthBloc>(
@@ -71,7 +80,6 @@ class MyApp extends StatelessWidget {
             useMaterial3: true,
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
           ),
-          // Route based on authentication state
           home: BlocBuilder<AuthBloc, AuthState>(
             builder: (context, state) {
               if (state is AuthAuthenticated) {
@@ -79,7 +87,6 @@ class MyApp extends StatelessWidget {
               } else if (state is AuthUnauthenticated || state is AuthError) {
                 return const LoginScreen();
               }
-              // Show a splash/loading screen while checking token on boot
               return const Scaffold(
                 body: Center(child: CircularProgressIndicator()),
               );
