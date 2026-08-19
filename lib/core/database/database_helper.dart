@@ -88,4 +88,38 @@ class DatabaseHelper {
       limit: limit,
     );
   }
+
+  // Groups data by hour for the last 24 hours
+  Future<List<Map<String, dynamic>>> getDailyHistory() async {
+    final db = await database;
+    return await db.rawQuery('''
+      SELECT 
+        strftime('%H:00', timestamp) as time_label,
+        AVG(heart_rate) as heart_rate,
+        AVG(spo2) as spo2,
+        MAX(steps) as steps,
+        AVG(battery_level) as battery_level
+      FROM $tableReadings
+      WHERE timestamp >= datetime('now', '-1 day')
+      GROUP BY strftime('%Y-%m-%d %H', timestamp)
+      ORDER BY timestamp ASC
+    ''');
+  }
+
+  // Groups data by day for the last 7 days
+  Future<List<Map<String, dynamic>>> getWeeklySummary() async {
+    final db = await database;
+    return await db.rawQuery('''
+      SELECT 
+        strftime('%Y-%m-%d', timestamp) as time_label,
+        AVG(heart_rate) as heart_rate,
+        AVG(spo2) as spo2,
+        MAX(steps) as steps,
+        AVG(battery_level) as battery_level
+      FROM $tableReadings
+      WHERE timestamp >= datetime('now', '-7 days')
+      GROUP BY strftime('%Y-%m-%d', timestamp)
+      ORDER BY timestamp ASC
+    ''');
+  }
 }
