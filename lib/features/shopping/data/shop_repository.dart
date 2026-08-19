@@ -21,7 +21,9 @@ class ShopRepository {
     try {
       await _apiClient.dio.post('/orders', data: {'product_ids': productIds});
     } on DioException catch (e) {
-      throw Exception('Checkout failed: ${e.message}');
+      // Extract the actual error message sent by the Node backend
+      final serverError = e.response?.data['error'] ?? e.response?.data ?? e.message;
+      throw Exception('Server error: $serverError');
     }
   }
 }
