@@ -3,6 +3,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import '../../../core/database/database_helper.dart';
 import '../../../core/network/api_client.dart';
+import 'package:wearable_health_app/features/wearable/domain/wearable_service.dart';
 
 class SyncManager {
   final ApiClient _apiClient;
@@ -70,6 +71,36 @@ class SyncManager {
       print('❌ Sync Engine Error: $e');
     } finally {
       _isSyncing = false;
+    }
+  }
+
+  // Fetches historical data from the server and restores the local database
+  Future<void> restoreDataFromServer() async {
+    try {
+      final response = await _apiClient.dio.get('/health/readings');
+      final List serverReadings = response.data['readings'];
+
+      if (serverReadings.isEmpty) return;
+
+      // Insert the downloaded records back into SQLite
+      for (var reading in serverReadings) {
+        final Map<String, dynamic> cleanData = Map<String, dynamic>.from(reading);
+
+        final packet = HealthDataPacket(
+          deviceId: cleanData['device_id'] ?? cleanData['deviceId'] ?? 'FITRING-001',
+          heartRate: (cleanData['heart_rate'] as num).toInt(),
+          spo2: (cleanData['spo2'] as num).toInt(),
+          steps: (cleanData['steps'] as num).toInt(),
+          batteryLevel: (cleanData['battery_level'] as num).toInt(),
+          timestamp: DateTime.parse(cleanData['timestamp']),
+        );
+
+        await _dbHelper.insertReading(packet);
+      }
+
+      print('Successfully restored ${serverReadings.length} readings from the server.');
+    } catch (e) {
+      print('Failed to restore data: $e');
     }
   }
 

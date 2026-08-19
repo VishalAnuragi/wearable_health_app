@@ -66,6 +66,7 @@ class MyApp extends StatelessWidget {
         RepositoryProvider<AuthRepository>.value(value: authRepository),
         RepositoryProvider<SyncManager>.value(value: syncManager), // Provide globally
         RepositoryProvider<ShopRepository>.value(value: shopRepository),
+        RepositoryProvider<SyncManager>.value(value: syncManager),
       ],
       // ... keep the rest of your MultiBlocProvider and MaterialApp exactly the same
       child: MultiBlocProvider(
