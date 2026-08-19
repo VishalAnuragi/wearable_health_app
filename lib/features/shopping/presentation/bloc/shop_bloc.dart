@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/shop_repository.dart';
 import '../../domain/product.dart';
+import '../../domain/order.dart';
 
 // --- Events ---
 sealed class ShopEvent {}
@@ -11,6 +12,8 @@ class AddToCart extends ShopEvent {
 }
 class CheckoutCart extends ShopEvent {}
 
+class LoadOrderHistory extends ShopEvent {}
+
 // --- State ---
 class ShopState {
   final bool isLoading;
@@ -18,6 +21,7 @@ class ShopState {
   final List<Product> cart;
   final String? errorMessage;
   final bool checkoutSuccess;
+  final List<Order> orderHistory;
 
   const ShopState({
     this.isLoading = false,
@@ -25,6 +29,7 @@ class ShopState {
     this.cart = const [],
     this.errorMessage,
     this.checkoutSuccess = false,
+    this.orderHistory = const [],
   });
 
   ShopState copyWith({
@@ -33,6 +38,7 @@ class ShopState {
     List<Product>? cart,
     String? errorMessage,
     bool? checkoutSuccess,
+    List<Order>? orderHistory,
   }) {
     return ShopState(
       isLoading: isLoading ?? this.isLoading,
@@ -40,6 +46,7 @@ class ShopState {
       cart: cart ?? this.cart,
       errorMessage: errorMessage, // We want to clear this if not explicitly passed
       checkoutSuccess: checkoutSuccess ?? false,
+      orderHistory: orderHistory ?? this.orderHistory,
     );
   }
 }
@@ -52,6 +59,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     on<LoadProducts>(_onLoadProducts);
     on<AddToCart>(_onAddToCart);
     on<CheckoutCart>(_onCheckoutCart);
+    on<LoadOrderHistory>(_onLoadOrderHistory);
   }
 
   Future<void> _onLoadProducts(LoadProducts event, Emitter<ShopState> emit) async {
@@ -78,6 +86,18 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
       await _repository.placeOrder(productIds);
       // Clear the cart on success
       emit(state.copyWith(isLoading: false, cart: const [], checkoutSuccess: true));
+    } catch (e) {
+      emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
+    }
+  }
+
+  // Inside ShopBloc constructor: on<LoadOrderHistory>(_onLoadOrderHistory);
+
+  Future<void> _onLoadOrderHistory(LoadOrderHistory event, Emitter<ShopState> emit) async {
+    emit(state.copyWith(isLoading: true));
+    try {
+      final history = await _repository.getOrderHistory();
+      emit(state.copyWith(isLoading: false, orderHistory: history));
     } catch (e) {
       emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
     }

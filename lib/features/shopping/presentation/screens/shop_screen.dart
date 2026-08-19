@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/shop_bloc.dart';
+import 'order_history_screen.dart';
 
 class ShopScreen extends StatelessWidget {
   const ShopScreen({super.key});
@@ -8,7 +9,23 @@ class ShopScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Store')),
+      appBar: AppBar(
+        title: const Text('Store'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => BlocProvider.value(
+                    value: context.read<ShopBloc>(),
+                    child: const OrderHistoryScreen(),
+                  ))
+              );
+            },
+          )
+        ],
+      ),
       body: BlocConsumer<ShopBloc, ShopState>(
         listener: (context, state) {
           if (state.errorMessage != null) {

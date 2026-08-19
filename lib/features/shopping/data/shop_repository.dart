@@ -1,5 +1,6 @@
 import '../../../../core/error/error_handler.dart'; // Import the handler
 import '../../../core/network/api_client.dart';
+import '../domain/order.dart';
 import '../domain/product.dart';
 
 class ShopRepository {
@@ -23,6 +24,16 @@ class ShopRepository {
       // Note: adjust 'product_ids' to whatever your Node server requires
       // (e.g., 'items') if you changed it earlier.
       await _apiClient.dio.post('/orders', data: {'product_ids': productIds});
+    } catch (e) {
+      throw ErrorHandler.handle(e);
+    }
+  }
+
+  Future<List<Order>> getOrderHistory() async {
+    try {
+      final response = await _apiClient.dio.get('/orders');
+      final List data = response.data['orders'];
+      return data.map((json) => Order.fromJson(json)).toList();
     } catch (e) {
       throw ErrorHandler.handle(e);
     }
