@@ -4,6 +4,7 @@ import '../../../wearable/domain/wearable_service.dart';
 import '../../../wearable/presentation/bloc/wearable_bloc.dart';
 import '../../../wearable/presentation/bloc/wearable_event.dart';
 import '../../../wearable/presentation/bloc/wearable_state.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -14,6 +15,7 @@ class DashboardScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Health Dashboard'),
         actions: [
+          // Existing Bluetooth Toggle
           BlocBuilder<WearableBloc, WearableState>(
             builder: (context, state) {
               final isConnected = state.connectionState == DeviceConnectionState.connected;
@@ -28,7 +30,16 @@ class DashboardScreen extends StatelessWidget {
                 },
               );
             },
-          )
+          ),
+          // 2. New Logout Button
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: () {
+              // This single event clears the token and triggers the root redirect!
+              context.read<AuthBloc>().add(LogoutRequested());
+            },
+          ),
         ],
       ),
       body: BlocBuilder<WearableBloc, WearableState>(
