@@ -1,5 +1,5 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../../../core/error/error_handler.dart'; // Import the handler
 import '../../../core/network/api_client.dart';
 import '../domain/auth_repository.dart';
 
@@ -21,10 +21,10 @@ class AuthRepositoryImpl implements AuthRepository {
       if (token != null) {
         await _storage.write(key: 'jwt_token', value: token);
       } else {
-        throw Exception('No token received from server');
+        throw FormatException('No token received from server');
       }
-    } on DioException catch (e) {
-      throw Exception(e.response?.data['message'] ?? 'Login failed. Check your connection.');
+    } catch (e) {
+      throw ErrorHandler.handle(e);
     }
   }
 
@@ -35,7 +35,11 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<bool> hasValidToken() async {
-    final token = await _storage.read(key: 'jwt_token');
-    return token != null && token.isNotEmpty;
+    try {
+      final token = await _storage.read(key: 'jwt_token');
+      return token != null && token.isNotEmpty;
+    } catch (e) {
+      return false; // Safely handle storage reading errors
+    }
   }
 }

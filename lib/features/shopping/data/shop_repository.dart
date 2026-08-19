@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart';
+import '../../../../core/error/error_handler.dart'; // Import the handler
 import '../../../core/network/api_client.dart';
 import '../domain/product.dart';
 
@@ -12,18 +12,19 @@ class ShopRepository {
       final response = await _apiClient.dio.get('/products');
       final List data = response.data['products'];
       return data.map((json) => Product.fromJson(json)).toList();
-    } on DioException catch (e) {
-      throw Exception('Failed to load products: ${e.message}');
+    } catch (e) {
+      // Pass the raw error to our handler, and throw the clean AppException
+      throw ErrorHandler.handle(e);
     }
   }
 
   Future<void> placeOrder(List<String> productIds) async {
     try {
+      // Note: adjust 'product_ids' to whatever your Node server requires
+      // (e.g., 'items') if you changed it earlier.
       await _apiClient.dio.post('/orders', data: {'product_ids': productIds});
-    } on DioException catch (e) {
-      // Extract the actual error message sent by the Node backend
-      final serverError = e.response?.data['error'] ?? e.response?.data ?? e.message;
-      throw Exception('Server error: $serverError');
+    } catch (e) {
+      throw ErrorHandler.handle(e);
     }
   }
 }
