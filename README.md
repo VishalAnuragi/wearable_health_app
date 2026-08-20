@@ -206,4 +206,6 @@ Please note that the backend for this application is currently configured to run
 
 *   The generated `app-release.apk` provided with this submission has the API base URL hardcoded to the local Wi-Fi IP address used during development.
 *   Because of this, **if you install the APK on a device outside of this specific local network, the app will not be able to reach the Node.js server**, resulting in API timeouts for logins, checkout, and health syncing.
+* After pull the backend code locally and installing node modules, open the terminal where `index.js` file is located and run - `npm index.js`.
+* In your flutter app code look for `apiClient.dart` file and replace the `baseUrl` with your local IPv4 and port on which you node server is running. Then you are good to go!.
 *   To evaluate the full-stack functionality (Flutter UI ↔ Node.js Backend ↔ Supabase Database), **please refer to the included screen recording session**. The video comprehensively demonstrates the offline queuing, successful data synchronization, database constraints, and the e-commerce checkout flow working seamlessly together.
