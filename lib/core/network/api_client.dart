@@ -9,7 +9,7 @@ class ApiClient {
   ApiClient() {
     dio = Dio(
       BaseOptions(
-        baseUrl: 'http://localhost:3000',
+        baseUrl: 'http://10.154.183.113:3000',
         connectTimeout: const Duration(seconds: 30), // Handles Render cold starts
         receiveTimeout: const Duration(seconds: 30),
         headers: {'Content-Type': 'application/json'},
