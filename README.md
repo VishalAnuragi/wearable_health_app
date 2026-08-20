@@ -195,3 +195,15 @@ The Node.js (Express) backend exposes the following RESTful endpoints:
 * **Backend unavailable:** Yes. In your earlier code snippet, your Flutter ApiClient had connectTimeout and receiveTimeout set to 30 seconds. If the backend is down, the app will time out gracefully rather than freezing forever.
 
 * **Bluetooth / device disconnect:** Yes. This is entirely hardware-dependent. If the physical wearable disconnects, the Flutter BLE (Bluetooth Low Energy) library should catch the disconnect event, pause the data collection, and resume queuing data once it reconnects.
+
+---
+
+---
+
+## ⚠️ Reviewer Notice: APK & Network Connectivity
+
+Please note that the backend for this application is currently configured to run in a **local development environment** (Node.js running on a local machine, connecting to a remote Supabase database). 
+
+*   The generated `app-release.apk` provided with this submission has the API base URL hardcoded to the local Wi-Fi IP address used during development.
+*   Because of this, **if you install the APK on a device outside of this specific local network, the app will not be able to reach the Node.js server**, resulting in API timeouts for logins, checkout, and health syncing.
+*   To evaluate the full-stack functionality (Flutter UI ↔ Node.js Backend ↔ Supabase Database), **please refer to the included screen recording session**. The video comprehensively demonstrates the offline queuing, successful data synchronization, database constraints, and the e-commerce checkout flow working seamlessly together.
