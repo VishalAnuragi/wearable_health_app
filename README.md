@@ -184,3 +184,14 @@ The Node.js (Express) backend exposes the following RESTful endpoints:
 * **Price Snapshotting:** The `order_items` table intentionally duplicates the product price as `price_at_purchase`. *Trade-off:* This denormalization uses slightly more storage but guarantees that historical order totals do not change if a product's price is updated in the future.
 
 ---
+
+
+
+## 10. Exception Handling
+
+**📱 Handled by the Flutter App (Client-Side)**
+* **No internet: Yes. We tested this earlier.** By queuing data in local SQLite and using a background sync process, the app safely holds onto health readings and cart items until Wi-Fi or cellular data returns.
+
+* **Backend unavailable:** Yes. In your earlier code snippet, your Flutter ApiClient had connectTimeout and receiveTimeout set to 30 seconds. If the backend is down, the app will time out gracefully rather than freezing forever.
+
+* **Bluetooth / device disconnect:** Yes. This is entirely hardware-dependent. If the physical wearable disconnects, the Flutter BLE (Bluetooth Low Energy) library should catch the disconnect event, pause the data collection, and resume queuing data once it reconnects.
