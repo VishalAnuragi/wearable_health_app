@@ -31,6 +31,8 @@ dependencies:
   flutter:
     sdk: flutter
 
+  bloc_test: ^9.1.5    # Specifically designed for testing BLoCs
+  mocktail: ^1.0.3     # Used to create fake versions of our repositories
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
